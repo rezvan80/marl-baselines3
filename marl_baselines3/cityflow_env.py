@@ -563,7 +563,7 @@ class CityFlowEnv(gym.Env):
         for s in states:
           state.append(s["num_in_seg_attend"])
         state=np.asarray(state)
-        state[: , : ,:30]=state[: , : , :30]-state[: , : , :30].mean()
+        
         return state
 
 
@@ -723,7 +723,7 @@ class CityFlowEnv(gym.Env):
         for s in next_states:
           next_state.append(s["num_in_seg_attend"])
         next_state=np.asarray(next_state)  
-        next_state[: , : , :30]=next_state[: , : ,:30]-next_state[: , : ,:30].mean()
+        
         reward=np.asarray(reward, dtype=np.float32)
         
         
@@ -739,7 +739,7 @@ class CityFlowEnv(gym.Env):
         )
         infos = [{} for _ in range(12)]
         
-        return next_state, reward, dones, infos
+        return next_state, reward/100, dones, infos
 
     def _inner_step(self, action):
         # copy current measurements to previous measurements
