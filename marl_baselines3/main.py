@@ -1,26 +1,39 @@
+
 import config
 import time
 from multiprocessing import Process
 import argparse
 import os
 import copy
-from cityflow_env import CityFlowEnv
-from independent_ppo import PPO
+
 import shutil
 import torch as th
 import random
 import numpy as np
+
+import random
+import numpy as np
 import torch.nn as nn
 from typing import Tuple
-from stable_baselines3.common.policies import ActorCriticPolicy
+
 import math
 import torch.nn.functional as F
 import numpy as np
-from evaluate_policy import evaluate_policy
 seed = 42
 np.random.seed(seed)
 th.manual_seed(seed)
 random.seed(seed)
+
+if th.cuda.is_available():
+    th.cuda.manual_seed(seed)
+    th.cuda.manual_seed_all(seed)
+th.backends.cudnn.deterministic = True
+th.backends.cudnn.benchmark = False
+th.use_deterministic_algorithms(True)
+from cityflow_env import CityFlowEnv
+from independent_ppo import PPO
+from evaluate_policy import evaluate_policy
+from stable_baselines3.common.policies import ActorCriticPolicy
 
 def lane_relation(phase_map):
     num_lanes=24
@@ -475,11 +488,10 @@ def main(in_args=None):
                 os.path.join(deploy_dic_path["PATH_TO_WORK_DIRECTORY"], deploy_dic_traffic_env_conf["ROADNET_FILE"]))
     
     env=CityFlowEnv(deploy_dic_path["PATH_TO_WORK_DIRECTORY"],deploy_dic_path["PATH_TO_WORK_DIRECTORY"], deploy_dic_traffic_env_conf , deploy_dic_path)
-    ppo=PPO(CustomPolicy  ,  env , 12 , verbose=1 , n_steps=120)
+    ppo=PPO(CustomPolicy  ,  env , 12 , verbose=1 ,batch_size=30, n_steps=120)
     ppo.learn(env, total_timesteps=24000 , log_interval=1)
+    
 
-    mean , std= evaluate_policy(ppo , env)
-    print(mean , std)
 if __name__ == "__main__":
     args = parse_args()
 
