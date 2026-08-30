@@ -267,8 +267,11 @@ class Intersection:
         v=[]
         for i, lane in enumerate(list_lanes):
             veh=deque([0]*30 ,maxlen=30)
-            mask=deque([1]*10 , maxlen=10)    
-            for vehicle in lane_vehicles[lane]:
+            mask=deque([1]*10 , maxlen=10)
+            vehicles = [veh for veh in lane_vehicles[lane] if "shadow" not in veh]
+            vehicles = sorted(vehicles,key=lambda vehicle: vehicle_distance[vehicle], reverse=True)   
+
+            for vehicle in vehicles:
                 # set as num_vehicle
                 if "shadow" in vehicle:  # remove the shadow
                     vehicle = vehicle[:-7]
