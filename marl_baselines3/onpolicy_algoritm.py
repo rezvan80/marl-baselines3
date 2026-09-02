@@ -64,7 +64,6 @@ class OnPolicyAlgorithm(BaseAlgorithm):
         self,
         policy: str | type[ActorCriticPolicy],
         env: Any,
-        num_agents:int,
         learning_rate: float | Schedule,
         n_steps: int,
         gamma: float,
