@@ -488,11 +488,14 @@ def main(in_args=None):
                 os.path.join(deploy_dic_path["PATH_TO_WORK_DIRECTORY"], deploy_dic_traffic_env_conf["ROADNET_FILE"]))
     
     env=CityFlowEnv(deploy_dic_path["PATH_TO_WORK_DIRECTORY"],deploy_dic_path["PATH_TO_WORK_DIRECTORY"], deploy_dic_traffic_env_conf , deploy_dic_path)
-    ppo=PPO(CustomPolicy  ,  env , 12 , verbose=1 ,batch_size=30, n_steps=120)
-    ppo.learn(env, total_timesteps=24000 , log_interval=1)
-    
+
+    return env
 
 if __name__ == "__main__":
     args = parse_args()
 
-    main(args)
+    env=main(args)
+    ppo=PPO(CustomPolicy  ,  env , verbose=1 ,batch_size=30, n_steps=120)
+    ppo.learn(env, total_timesteps=24000 , log_interval=1)
+    mean , std= evaluate_policy(ppo , env)
+    print(mean , std)    
