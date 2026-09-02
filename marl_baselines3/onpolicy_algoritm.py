@@ -111,7 +111,7 @@ class OnPolicyAlgorithm(BaseAlgorithm):
         self.max_grad_norm = max_grad_norm
         self.rollout_buffer_class = rollout_buffer_class
         self.rollout_buffer_kwargs = rollout_buffer_kwargs or {}
-        self.num_agents=num_agents
+        self.num_agents=env.num_agents
         if _init_setup_model:
             self._setup_model()
 
@@ -195,7 +195,7 @@ class OnPolicyAlgorithm(BaseAlgorithm):
             self.policy.reset_noise(env.num_envs)
 
         callback.on_rollout_start()
-        episode_rewards=[0]*12
+        episode_rewards=[0]*self.num_agents
         while n_steps < n_rollout_steps:
             if self.use_sde and self.sde_sample_freq > 0 and n_steps % self.sde_sample_freq == 0:
                 # Sample a new noise matrix
@@ -231,11 +231,11 @@ class OnPolicyAlgorithm(BaseAlgorithm):
                           "l": n_steps + 1,
                       }
                   }
-                  for i in range(12)
+                  for i in range(self.num_agents)
               ]
-              episode_rewards=[0]*12
+              episode_rewards=[0]*self.num_agents
             else:
-              infos = [{} for _ in range(12)]
+              infos = [{} for _ in range(self.num_agents)]
 
             self.num_timesteps += env.num_envs
 
