@@ -474,6 +474,7 @@ class CityFlowEnv(gym.Env):
         self.dic_path = dic_path
         self.observation_space = Box(low=-1.0,high=1.0,shape=(24, 40,),dtype=np.float32)
         self.action_space=Discrete(4, )
+        self.num_agents=dic_traffic_env_conf["NUM_INTERSECTIONS"]
         self.current_time = None
         self.id_to_index = None
         self.traffic_light_node_dict = None
@@ -505,7 +506,7 @@ class CityFlowEnv(gym.Env):
         cityflow_config = {
             "interval": self.dic_traffic_env_conf["INTERVAL"],
             "seed": int(np.random.randint(0, 100)),
-            "laneChange": True,
+            "laneChange": False,
             "dir": self.path_to_work_directory+"/",
             "roadnetFile": self.dic_traffic_env_conf["ROADNET_FILE"],
             "flowFile": self.dic_traffic_env_conf["TRAFFIC_FILE"],
@@ -736,11 +737,11 @@ class CityFlowEnv(gym.Env):
         #print("Step time: ", time.time() - step_start_time)
 
         dones = np.full(
-        12,
+        self.num_agents,
         done,
         dtype=bool
         )
-        infos = [{} for _ in range(12)]
+        infos = [{} for _ in range(self.num_agents)]
         
         return next_state, reward/100, dones, infos
 
