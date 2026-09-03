@@ -62,14 +62,19 @@ def evaluate_policy(
 
     n_envs = env.num_envs
     episode_rewards = []
-    episode_lengths = []
-
+    episode_queue_lengths = []
+    episode_queue_nums = []
+    episode_waiting_times = []
+    episode_travel_times = []
     episode_counts = 0
     # Divides episodes among different sub environments in the vector as evenly as possible
     episode_count_targets = 10
 
     current_rewards = 0
-    current_lengths = 0
+    current_queue_lengths = []
+    current_queue_nums = []
+    current_waiting_timess = []
+    current_travel_times = 0
     observations = env.reset()
     states = None
     episode_starts = np.ones((env.num_envs,), dtype=bool)
@@ -80,8 +85,12 @@ def evaluate_policy(
             episode_start=episode_starts,
             deterministic=deterministic,
         )
-        new_observations, rewards, dones, infos = env.step(actions)
+        new_observations, rewards, dones , queue_lengths , waiting_times , travel_times, infos = env.step(actions)
         current_rewards += rewards.sum()
+        current_queue_lengths.append(queue_lengths)
+        current_queue_nums.append(queue_nums)
+        current_waiting_timess.append(waiting_times)
+        current_travel_times += travel_times
         current_lengths += 1
         
         if episode_counts < episode_count_targets:
@@ -99,9 +108,18 @@ def evaluate_policy(
 
                     
                     episode_rewards.append(current_rewards)
+                    episode_queue_lengths.append(current_queue_lengths)
+                    episode_queue_nums.append(current_queue_nums)
+                    episode_waiting_times.append(current_waiting_times)
+                    episode_travel_times.append(current_travel_times)
                     episode_lengths.append(current_lengths)
+
                     episode_counts += 1
                     current_rewards = 0
+                    current_queue_lengths = []
+                    current_queue_nums = []
+                    current_waiting_timess = []
+                    current_travel_times = 0
                     current_lengths = 0
 
         observations = new_observations
@@ -110,8 +128,16 @@ def evaluate_policy(
 
     mean_reward = np.mean(episode_rewards)
     std_reward = np.std(episode_rewards)
+    mean_queue_length = np.mean(episode_queue_lengths)
+    std_queue_length = np.std(episode_queue_lengths)
+    mean_queue_num = np.mean(episode_queue_nums)
+    std_queue_num = np.std(episode_queue_nums)
+    mean_waiting_time = np.mean(episode_waiting_times)
+    std_waiting_time = np.std(episode_waiting_times)
+    mean_travel_time = np.mean(episode_travel_times)
+    std_travel_time = np.std(episode_travel_times)
     if reward_threshold is not None:
         assert mean_reward > reward_threshold, "Mean reward below threshold: " f"{mean_reward:.2f} < {reward_threshold:.2f}"
     if return_episode_rewards:
         return episode_rewards, episode_lengths
-    return mean_reward, std_reward
+    return mean_reward, std_reward, mean_queue_length, std_queue_length, mean_queue_num, std_queue_num, mean_waiting_time, std_waiting_time, mean_travel_time, std_travel_time 
