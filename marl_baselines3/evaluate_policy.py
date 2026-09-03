@@ -72,8 +72,7 @@ def evaluate_policy(
 
     current_rewards = 0
     current_queue_lengths = []
-    current_queue_nums = []
-    current_waiting_timess = []
+    current_waiting_times = []
     current_travel_times = 0
     observations = env.reset()
     states = None
@@ -88,8 +87,7 @@ def evaluate_policy(
         new_observations, rewards, dones , queue_lengths , waiting_times , travel_times, infos = env.step(actions)
         current_rewards += rewards.sum()
         current_queue_lengths.append(queue_lengths)
-        current_queue_nums.append(queue_nums)
-        current_waiting_timess.append(waiting_times)
+        current_waiting_times.append(waiting_times)
         current_travel_times += travel_times
         current_lengths += 1
         
@@ -109,7 +107,6 @@ def evaluate_policy(
                     
                     episode_rewards.append(current_rewards)
                     episode_queue_lengths.append(current_queue_lengths)
-                    episode_queue_nums.append(current_queue_nums)
                     episode_waiting_times.append(current_waiting_times)
                     episode_travel_times.append(current_travel_times)
                     episode_lengths.append(current_lengths)
@@ -117,7 +114,6 @@ def evaluate_policy(
                     episode_counts += 1
                     current_rewards = 0
                     current_queue_lengths = []
-                    current_queue_nums = []
                     current_waiting_timess = []
                     current_travel_times = 0
                     current_lengths = 0
