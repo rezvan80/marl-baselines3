@@ -745,6 +745,18 @@ class CityFlowEnv(gym.Env):
 
         if (self.current_time+1)%3600==0:
           done=True
+          vehicle_travel_times = {}
+          for inter in self.env.list_intersection:
+              arrive_left_times = inter.dic_vehicle_arrive_leave_time
+              for veh in arrive_left_times:
+                  enter_time = arrive_left_times[veh]["enter_time"]
+                  leave_time = arrive_left_times[veh]["leave_time"]
+                  if not np.isnan(enter_time) and not np.isnan(leave_time):
+                      if veh not in vehicle_travel_times:
+                          vehicle_travel_times[veh] = [leave_time - enter_time]
+                      else:
+                          vehicle_travel_times[veh].append(leave_time - enter_time)
+          total_travel_time = np.mean([sum(vehicle_travel_times[veh]) for veh in vehicle_travel_times])
           next_state = self.reset()
         #print("Step time: ", time.time() - step_start_time)
 
