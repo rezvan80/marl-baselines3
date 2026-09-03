@@ -742,7 +742,7 @@ class CityFlowEnv(gym.Env):
         for veh in self.waiting_vehicle_list:
             waiting_times.append(self.env.waiting_vehicle_list[veh]['time'])
         waiting_time=np.mean(waiting_times) if len(waiting_times) > 0 else 0.0
-
+        total_travel_time=0
         if (self.current_time+1)%3600==0:
           done=True
           vehicle_travel_times = {}
@@ -767,7 +767,7 @@ class CityFlowEnv(gym.Env):
         )
         infos = [{} for _ in range(self.num_agents)]
         
-        return next_state, reward/100, dones,queue_length , waiting_time,travel , total_travel_time,  infos
+        return next_state, reward/100, dones,queue_length , waiting_time, total_travel_time,  infos
 
     def _inner_step(self, action):
         # copy current measurements to previous measurements
