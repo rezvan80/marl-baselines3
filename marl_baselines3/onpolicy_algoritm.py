@@ -222,9 +222,12 @@ class OnPolicyAlgorithm(BaseAlgorithm):
                     # as we are sampling from an unbounded Gaussian distribution
                     clipped_actions = np.clip(actions, self.action_space.low, self.action_space.high)
 
-            new_obs, rewards, dones,queue_length , waiting_time,travel , total_travel_time, infos = env.step(clipped_actions)
+            new_obs, rewards, dones,queue_length , waiting_time , total_travel_time, infos = env.step(clipped_actions)
             episode_rewards+= 100*rewards.sum()
-            
+            episode_queue_lengths.append(queue_length)
+            episode_waiting_times.append(waiting_time)
+            episode_total_travel_time+=total_travel_time
+ 
             if np.any(dones): 
               infos = [
                   {
