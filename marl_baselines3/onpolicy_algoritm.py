@@ -194,7 +194,10 @@ class OnPolicyAlgorithm(BaseAlgorithm):
             self.policy.reset_noise(env.num_envs)
 
         callback.on_rollout_start()
-        episode_rewards=[0]*self.num_agents
+        episode_rewards=0
+        episode_queue_lengths=[]
+        episode_waiting_times=[]
+        episode_total_travel_time=0
         while n_steps < n_rollout_steps:
             if self.use_sde and self.sde_sample_freq > 0 and n_steps % self.sde_sample_freq == 0:
                 # Sample a new noise matrix
@@ -219,20 +222,28 @@ class OnPolicyAlgorithm(BaseAlgorithm):
                     # as we are sampling from an unbounded Gaussian distribution
                     clipped_actions = np.clip(actions, self.action_space.low, self.action_space.high)
 
-            new_obs, rewards, dones, infos = env.step(clipped_actions)
-            episode_rewards+= rewards
+            new_obs, rewards, dones,queue_length , waiting_time,travel , total_travel_time, infos = env.step(clipped_actions)
+            episode_rewards+= 100*rewards.sum()
             
             if np.any(dones): 
               infos = [
                   {
                       "episode": {
-                          "r": float(episode_rewards[i]),
+                          "r": float(episode_rewards),
+                          "ql": float(np.mean(episode_queue_lengths)),
+                          "qn": float(np.sum(episode_queue_lengths)),
+                          "wt": float(np.mean(episode_waiting_times)),
+                          "tt": float(episode_total_travel_time),
                           "l": n_steps + 1,
                       }
                   }
                   for i in range(self.num_agents)
               ]
-              episode_rewards=[0]*self.num_agents
+                
+              episode_rewards=0
+              episode_queue_lengths=[]
+              episode_waiting_times=[]
+              episode_total_travel_time=0
             else:
               infos = [{} for _ in range(self.num_agents)]
 
@@ -314,7 +325,12 @@ class OnPolicyAlgorithm(BaseAlgorithm):
             self.logger.record("time/iterations", iteration, exclude="tensorboard")
         if len(self.ep_info_buffer) > 0 and len(self.ep_info_buffer[0]) > 0:
             self.logger.record("rollout/ep_rew_mean", safe_mean([ep_info["r"] for ep_info in self.ep_info_buffer]))
+            self.logger.record("rollout/ep_queue_lengths_mean", safe_mean([ep_info["ql"] for ep_info in self.ep_info_buffer]))
+            self.logger.record("rollout/ep_queue_nums_mean", safe_mean([ep_info["qn"] for ep_info in self.ep_info_buffer]))
+            self.logger.record("rollout/ep_waiting_times_mean", safe_mean([ep_info["wt"] for ep_info in self.ep_info_buffer])) 
+            self.logger.record("rollout/episode_total_travel_time_mean", safe_mean([ep_info["tt"] for ep_info in self.ep_info_buffer]))
             self.logger.record("rollout/ep_len_mean", safe_mean([ep_info["l"] for ep_info in self.ep_info_buffer]))
+
         self.logger.record("time/fps", fps)
         self.logger.record("time/time_elapsed", int(time_elapsed), exclude="tensorboard")
         self.logger.record("time/total_timesteps", self.num_timesteps, exclude="tensorboard")
