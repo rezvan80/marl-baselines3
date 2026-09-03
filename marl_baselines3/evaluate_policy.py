@@ -66,6 +66,7 @@ def evaluate_policy(
     episode_queue_nums = []
     episode_waiting_times = []
     episode_travel_times = []
+    episode_lengths = []
     episode_counts = 0
     # Divides episodes among different sub environments in the vector as evenly as possible
     episode_count_targets = 10
