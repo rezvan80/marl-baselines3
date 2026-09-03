@@ -493,9 +493,15 @@ def main(in_args=None):
 
 if __name__ == "__main__":
     args = parse_args()
-
-    env=main(args)
+    datasets={jinan:["anon_3_4_jinan_real.json" , "anon_3_4_jinan_real_2000.json" , "anon_3_4_jinan_real_2500.json" , "anon_3_4_jinan_synthetic_24000_60min.json" , "anon_3_4_jinan_synthetic_24h_6000.json"], hangzou:["anon_4_4_hangzhou_real.json", "anon_4_4_hangzhou_real_5816.json", "anon_4_4_hangzhou_synthetic_24000_60min.json"], new_york:["anon_28_7_newyork_real_double.json" , "anon_28_7_newyork_real_triple.json"]}
     ppo=PPO(CustomPolicy  ,  env , verbose=1 ,batch_size=30, n_steps=120)
     ppo.learn(env, total_timesteps=24000 , log_interval=1)
-    mean , std= evaluate_policy(ppo , env)
-    print(mean , std)    
+        
+    for dataset, traffic_files in datasets.items():
+        for traffic_file in traffic_files:
+            args.dataset = dataset
+            args.traffic_file = traffic_file
+            env = main(args)
+            mean_reward, std_reward, mean_queue_length, std_queue_length, mean_queue_num, std_queue_num, mean_waiting_time, std_waiting_time, mean_travel_time, std_travel_time = evaluate_policy(ppo , env)
+            print("mean_reward:", mean_reward,"std_reward", std_reward, "mean_queue_length:" , mean_queue_length, "std_queue_length:" ,std_queue_length, "mean_queue_num:", mean_queue_num, "std_queue_num:", std_queue_num, "mean_waiting_time:" ,mean_waiting_time, "std_waiting_time:" ,std_waiting_time, "mean_travel_time:" ,mean_travel_time, "std_travel_time:" ,std_travel_time )    
+ 
