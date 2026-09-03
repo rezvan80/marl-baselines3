@@ -767,7 +767,7 @@ class CityFlowEnv(gym.Env):
         )
         infos = [{} for _ in range(self.num_agents)]
         
-        return next_state, reward/100, dones,queue_length , waiting_time, infos
+        return next_state, reward/100, dones,queue_length , waiting_time,travel , total_travel_time,  infos
 
     def _inner_step(self, action):
         # copy current measurements to previous measurements
