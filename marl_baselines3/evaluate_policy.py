@@ -107,8 +107,9 @@ def evaluate_policy(
 
                     
                     episode_rewards.append(current_rewards)
-                    episode_queue_lengths.append(current_queue_lengths)
-                    episode_waiting_times.append(current_waiting_times)
+                    episode_queue_lengths.append(np.mean(current_queue_lengths))
+                    episode_queue_nums.append(np.sum(current_queue_lengths))
+                    episode_waiting_times.append(np.mean(current_waiting_times))
                     episode_travel_times.append(current_travel_times)
                     episode_lengths.append(current_lengths)
 
