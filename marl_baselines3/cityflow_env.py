@@ -277,7 +277,7 @@ class Intersection:
                     vehicle = vehicle[:-7]
                     continue
 
-                veh.extend([vehicle_speed[vehicle]/2 , vehicle_distance[vehicle]/100 , i/24 ])
+                veh.extend([vehicle_speed[vehicle]/10 , vehicle_distance[vehicle]/300 , i/24 ])
                 mask.extend([0])
             v.append(list(veh)+list(mask)) 
         return v
@@ -740,13 +740,13 @@ class CityFlowEnv(gym.Env):
         # waiting time
         waiting_times = []
         for veh in self.waiting_vehicle_list:
-            waiting_times.append(self.env.waiting_vehicle_list[veh]['time'])
+            waiting_times.append(self.waiting_vehicle_list[veh]['time'])
         waiting_time=np.mean(waiting_times) if len(waiting_times) > 0 else 0.0
         total_travel_time=0
         if (self.current_time+1)%3600==0:
           done=True
           vehicle_travel_times = {}
-          for inter in self.env.list_intersection:
+          for inter in self.list_intersection:
               arrive_left_times = inter.dic_vehicle_arrive_leave_time
               for veh in arrive_left_times:
                   enter_time = arrive_left_times[veh]["enter_time"]
