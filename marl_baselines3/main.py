@@ -493,7 +493,7 @@ def main(in_args=None):
 
 if __name__ == "__main__":
     args = parse_args()
-    datasets={"jinan":["anon_3_4_jinan_real.json" , "anon_3_4_jinan_real_2000.json" , "anon_3_4_jinan_real_2500.json" , "anon_3_4_jinan_synthetic_24000_60min.json"], "hangzou":["anon_4_4_hangzhou_real.json", "anon_4_4_hangzhou_real_5816.json", "anon_4_4_hangzhou_synthetic_24000_60min.json"], "new_york":["anon_28_7_newyork_real_double.json" , "anon_28_7_newyork_real_triple.json"]}
+    datasets={"jinan":["anon_3_4_jinan_real.json" , "anon_3_4_jinan_real_2000.json" , "anon_3_4_jinan_real_2500.json" , "anon_3_4_jinan_synthetic_24000_60min.json"], "hangzhou":["anon_4_4_hangzhou_real.json", "anon_4_4_hangzhou_real_5816.json", "anon_4_4_hangzhou_synthetic_24000_60min.json"], "new_york":["anon_28_7_newyork_real_double.json" , "anon_28_7_newyork_real_triple.json"]}
     env = main(args)
     ppo=PPO(CustomPolicy  ,  env , verbose=1 ,batch_size=30, n_steps=120)
     ppo.learn(env, total_timesteps=24000 , log_interval=1)
