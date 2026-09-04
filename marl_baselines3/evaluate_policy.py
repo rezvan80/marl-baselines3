@@ -75,6 +75,7 @@ def evaluate_policy(
     current_queue_lengths = []
     current_waiting_times = []
     current_travel_times = 0
+    current_lengths = 0
     observations = env.reset()
     states = None
     episode_starts = np.ones((env.num_envs,), dtype=bool)
