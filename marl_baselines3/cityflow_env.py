@@ -488,6 +488,7 @@ class CityFlowEnv(gym.Env):
         self.list_lanes = None
         self.system_states = None
         self.lane_length = None
+        self.ret_rms = RunningMeanStd(shape=())
         self.waiting_vehicle_list = {}
         self.num_envs=1
         # check min action time
