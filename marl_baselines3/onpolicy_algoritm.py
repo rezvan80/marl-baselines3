@@ -195,6 +195,7 @@ class OnPolicyAlgorithm(BaseAlgorithm):
 
         callback.on_rollout_start()
         episode_rewards=0
+        episode_rewards2=0
         episode_queue_lengths=[]
         episode_waiting_times=[]
         episode_total_travel_time=0
@@ -222,8 +223,9 @@ class OnPolicyAlgorithm(BaseAlgorithm):
                     # as we are sampling from an unbounded Gaussian distribution
                     clipped_actions = np.clip(actions, self.action_space.low, self.action_space.high)
 
-            new_obs, rewards, dones,queue_length , waiting_time , total_travel_time, infos = env.step(clipped_actions)
-            episode_rewards+= 100*rewards.sum()
+            new_obs, rewards,rewards2, dones,queue_length , waiting_time , total_travel_time, infos = env.step(clipped_actions)
+            episode_rewards+= rewards.sum()
+            episode_rewards2+= rewards2.sum()
             episode_queue_lengths.append(queue_length)
             episode_waiting_times.append(waiting_time)
             episode_total_travel_time+=total_travel_time
@@ -233,6 +235,7 @@ class OnPolicyAlgorithm(BaseAlgorithm):
                   {
                       "episode": {
                           "r": float(episode_rewards),
+                          "r2": float(episode_rewards2),
                           "ql": float(np.mean(episode_queue_lengths)),
                           "qn": float(np.sum(episode_queue_lengths)),
                           "wt": float(np.mean(episode_waiting_times)),
@@ -244,6 +247,7 @@ class OnPolicyAlgorithm(BaseAlgorithm):
               ]
                 
               episode_rewards=0
+              episode_rewards2=0
               episode_queue_lengths=[]
               episode_waiting_times=[]
               episode_total_travel_time=0
@@ -328,6 +332,7 @@ class OnPolicyAlgorithm(BaseAlgorithm):
             self.logger.record("time/iterations", iteration, exclude="tensorboard")
         if len(self.ep_info_buffer) > 0 and len(self.ep_info_buffer[0]) > 0:
             self.logger.record("rollout/ep_rew_mean", safe_mean([ep_info["r"] for ep_info in self.ep_info_buffer]))
+            self.logger.record("rollout/ep_rew2_mean", safe_mean([ep_info["r2"] for ep_info in self.ep_info_buffer]))
             self.logger.record("rollout/ep_queue_lengths_mean", safe_mean([ep_info["ql"] for ep_info in self.ep_info_buffer]))
             self.logger.record("rollout/ep_queue_nums_mean", safe_mean([ep_info["qn"] for ep_info in self.ep_info_buffer]))
             self.logger.record("rollout/ep_waiting_times_mean", safe_mean([ep_info["wt"] for ep_info in self.ep_info_buffer])) 
