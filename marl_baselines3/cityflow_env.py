@@ -10,6 +10,7 @@ from multiprocessing import Process
 from my_utils import load_json, calculate_road_length
 from functools import reduce
 from collections import deque
+from stable_baselines3.common.running_mean_std import RunningMeanStd
 location_dict = {"North": "N", "South": "S", "East": "E", "West": "W"}
 location_dict_reverse = {"N": "North", "S": "South", "E": "East", "W": "West"}
 direction_dict = {"go_straight": "T", "turn_left": "L", "turn_right": "R"}
@@ -475,8 +476,10 @@ class CityFlowEnv(gym.Env):
         self.observation_space = Box(low=-1.0,high=1.0,shape=(24, 40,),dtype=np.float32)
         self.action_space=Discrete(4, )
         self.num_agents=dic_traffic_env_conf["NUM_INTERSECTIONS"]
+        self.returns = np.zeros(self.num_agents)
         self.current_time = None
         self.id_to_index = None
+        self.clip_reward=10
         self.traffic_light_node_dict = None
         self.intersection_dict = None
         self.eng = None
@@ -520,7 +523,7 @@ class CityFlowEnv(gym.Env):
             json.dump(cityflow_config, json_file)
 
         self.eng = engine.Engine(os.path.join(self.path_to_work_directory, "cityflow.config"), thread_num=1)
-
+        self.returns = np.zeros(self.num_agents)
         # get adjacency
         self.traffic_light_node_dict = self._adjacency_extraction()
 
@@ -766,8 +769,11 @@ class CityFlowEnv(gym.Env):
         dtype=bool
         )
         infos = [{} for _ in range(self.num_agents)]
-        
-        return next_state, reward/100, dones,queue_length , waiting_time, total_travel_time,  infos
+        self.returns = self.returns * 0.99 + reward
+        self.ret_rms.update(self.returns)
+        reward2 = np.clip(reward / np.sqrt(self.ret_rms.var + 1e-8), -self.clip_reward, self.clip_reward)
+
+        return next_state, reward2, reward, dones,queue_length , waiting_time, total_travel_time,  infos
 
     def _inner_step(self, action):
         # copy current measurements to previous measurements
