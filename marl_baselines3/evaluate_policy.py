@@ -12,7 +12,7 @@ from stable_baselines3.common.vec_env import DummyVecEnv, VecEnv, VecMonitor, is
 def evaluate_policy(
     model: "type_aliases.PolicyPredictor",
     env: gym.Env | VecEnv,
-    n_eval_episodes: int = 10,
+    n_eval_episodes: int = 1,
     deterministic: bool = True,
     render: bool = False,
     callback: Callable[[dict[str, Any], dict[str, Any]], None] | None = None,
@@ -69,13 +69,9 @@ def evaluate_policy(
     episode_lengths = []
     episode_counts = 0
     # Divides episodes among different sub environments in the vector as evenly as possible
-    episode_count_targets = 10
+    episode_count_targets = 1
 
-    current_rewards = 0
-    current_queue_lengths = []
-    current_waiting_times = []
-    current_travel_times = 0
-    current_lengths = 0
+
     observations = env.reset()
     states = None
     episode_starts = np.ones((env.num_envs,), dtype=bool)
@@ -86,12 +82,8 @@ def evaluate_policy(
             episode_start=episode_starts,
             deterministic=deterministic,
         )
-        new_observations, rewards, dones , queue_lengths , waiting_times , travel_times, infos = env.step(actions)
-        current_rewards += rewards.sum()
-        current_queue_lengths.append(queue_lengths)
-        current_waiting_times.append(waiting_times)
-        current_travel_times += travel_times
-        current_lengths += 1
+        new_observations, rewards, dones, infos = env.step(actions)
+
         
         if episode_counts < episode_count_targets:
                 # unpack values so that the callback can access the local variables
@@ -105,21 +97,21 @@ def evaluate_policy(
 
                 if dones.all():
                     
-
-                    
+                    current_rewards = infos[0]["episode"]["r2"]
+                    current_waiting_times=infos[0]["episode"]["wt"]  
+                    current_queue_lengths=infos[0]["episode"]["ql"]
+                    current_queue_nums=infos[0]["episode"]["qn"]
+                    current_total_travel_times =infos[0]["episode"]["tt"]    
+                    current_lengths =infos[0]["episode"]["l"]
                     episode_rewards.append(current_rewards)
-                    episode_queue_lengths.append(np.mean(current_queue_lengths))
-                    episode_queue_nums.append(np.sum(current_queue_lengths))
-                    episode_waiting_times.append(np.mean(current_waiting_times))
-                    episode_travel_times.append(current_travel_times)
+                    episode_queue_lengths.append(current_queue_lengths)
+                    episode_queue_nums.append(current_queue_lengths)
+                    episode_waiting_times.append(current_waiting_times)
+                    episode_travel_times.append(current_total_travel_times)
                     episode_lengths.append(current_lengths)
 
                     episode_counts += 1
-                    current_rewards = 0
-                    current_queue_lengths = []
-                    current_waiting_timess = []
-                    current_travel_times = 0
-                    current_lengths = 0
+
 
         observations = new_observations
 
