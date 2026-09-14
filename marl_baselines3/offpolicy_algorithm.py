@@ -352,15 +352,10 @@ class OffPolicyAlgorithm(BaseAlgorithm):
 
         assert self.env is not None, "You must set the environment before calling learn()"
         assert isinstance(self.train_freq, TrainFreq)  # check done in _setup_learn()
-        episode_rewards=0
-        episode_rewards2=0
-        episode_lengths=0
+
         while self.num_timesteps < total_timesteps:
-            rollout,episode_rewards,episode_rewards2,episode_lengths= self.collect_rollouts(
+            rollout= self.collect_rollouts(
                 self.env,
-                episode_rewards,
-                episode_rewards2,
-                episode_lengths,
                 train_freq=self.train_freq,
                 action_noise=self.action_noise,
                 callback=callback,
@@ -461,6 +456,10 @@ class OffPolicyAlgorithm(BaseAlgorithm):
         if len(self.ep_info_buffer) > 0 and len(self.ep_info_buffer[0]) > 0:
             self.logger.record("rollout/ep_rew_mean", safe_mean([ep_info["r"] for ep_info in self.ep_info_buffer]))
             self.logger.record("rollout/ep_rew2_mean", safe_mean([ep_info["r2"] for ep_info in self.ep_info_buffer]))
+            self.logger.record("rollout/ep_queue_lengths_mean", safe_mean([ep_info["ql"] for ep_info in self.ep_info_buffer]))
+            self.logger.record("rollout/ep_queue_nums_mean", safe_mean([ep_info["qn"] for ep_info in self.ep_info_buffer]))
+            self.logger.record("rollout/ep_waiting_times_mean", safe_mean([ep_info["wt"] for ep_info in self.ep_info_buffer])) 
+            self.logger.record("rollout/episode_total_travel_time_mean", safe_mean([ep_info["tt"] for ep_info in self.ep_info_buffer]))
             self.logger.record("rollout/ep_len_mean", safe_mean([ep_info["l"] for ep_info in self.ep_info_buffer]))
         self.logger.record("time/fps", fps)
         self.logger.record("time/time_elapsed", int(time_elapsed), exclude="tensorboard")
@@ -552,9 +551,7 @@ class OffPolicyAlgorithm(BaseAlgorithm):
     def collect_rollouts(
         self,
         env,
-        episode_rewards,
-        episode_rewards2,
-        episode_lengths,
+
         callback: BaseCallback,
         train_freq: TrainFreq,
         replay_buffer: ReplayBuffer,
@@ -607,28 +604,9 @@ class OffPolicyAlgorithm(BaseAlgorithm):
             actions, buffer_actions = self._sample_action(learning_starts, action_noise, env.num_agents)
 
             # Rescale and perform action
-            new_obs, rewards,rewards2, dones, infos = env.step(actions)
-            episode_rewards+= rewards.sum()
-            episode_rewards2+= rewards2.sum()
-            episode_lengths+=1
-            if np.any(dones): 
-              infos = [
-                  {
-                      "episode": {
-                          "r": float(episode_rewards),
-                          "r2": float(episode_rewards2),
-                          "l": episode_lengths + 1,
-                      }
-                  }
-                  for i in range(self.env.num_agents)
-              ]
-                
-              episode_rewards=0
-              episode_rewards2=0
-              episode_lengths=0
+            new_obs, rewards, dones, infos = env.step(actions)
 
-            else:
-              infos = [{} for _ in range(self.env.num_agents)]
+            
             self.num_timesteps += 1
             num_collected_steps += 1
 
@@ -667,5 +645,5 @@ class OffPolicyAlgorithm(BaseAlgorithm):
                     self.dump_logs()
         callback.on_rollout_end()
 
-        return RolloutReturn(num_collected_steps * env.num_envs, num_collected_episodes, continue_training),episode_rewards,episode_rewards2,episode_lengths
+        return RolloutReturn(num_collected_steps * env.num_envs, num_collected_episodes, continue_training)
 
