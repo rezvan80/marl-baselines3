@@ -690,6 +690,7 @@ class CityFlowEnv(gym.Env):
 
         self.intersection_dict = agent_intersections
 
+
     def step(self, action):
 
         step_start_time = time.time()
@@ -733,6 +734,9 @@ class CityFlowEnv(gym.Env):
         next_state=np.asarray(next_state)  
         
         reward=np.asarray(reward, dtype=np.float32)
+        self.returns = self.returns * 0.99 + reward
+        self.ret_rms.update(self.returns)
+        reward2 = np.clip(reward / np.sqrt(self.ret_rms.var + 1e-8), -self.clip_reward, self.clip_reward)
         
         # calculate logger results
 
@@ -740,15 +744,27 @@ class CityFlowEnv(gym.Env):
         for inter in self.list_intersection:
             queue_length_inter.append(sum(inter.dic_feature['lane_num_waiting_vehicle_in']))
         queue_length=sum(queue_length_inter)
-
+        infos = [{} for _ in range(self.num_agents)]
         # waiting time
         waiting_times = []
         for veh in self.waiting_vehicle_list:
             waiting_times.append(self.waiting_vehicle_list[veh]['time'])
         waiting_time=np.mean(waiting_times) if len(waiting_times) > 0 else 0.0
+        self.episode_rewards+= reward.sum()
+        self.episode_rewards2+= reward2.sum()
+        self.episode_queue_lengths.append(queue_length)
+        self.episode_waiting_times.append(waiting_time)
+        
+
         total_travel_time=0
         if (self.current_time+1)%3600==0:
           done=True
+          
+
+                
+
+          
+
           vehicle_travel_times = {}
           for inter in self.list_intersection:
               arrive_left_times = inter.dic_vehicle_arrive_leave_time
@@ -760,7 +776,25 @@ class CityFlowEnv(gym.Env):
                           vehicle_travel_times[veh] = [leave_time - enter_time]
                       else:
                           vehicle_travel_times[veh].append(leave_time - enter_time)
-          total_travel_time = np.mean([sum(vehicle_travel_times[veh]) for veh in vehicle_travel_times])
+          self.total_travel_time = np.mean([sum(vehicle_travel_times[veh]) for veh in vehicle_travel_times])
+          infos = [
+                  {
+                      "episode": {
+                          "r": float(self.episode_rewards),
+                          "r2": float(self.episode_rewards2),
+                          "ql": float(np.mean(self.episode_queue_lengths)),
+                          "qn": float(np.sum(self.episode_queue_lengths)),
+                          "wt": float(np.mean(self.episode_waiting_times)),
+                          "tt": float(self.total_travel_time),
+                          "l": self.current_time + 1,
+                      }
+                  }
+                  for i in range(self.num_agents)
+              ]
+          self.episode_rewards=0
+          self.episode_rewards2=0
+          self.episode_queue_lengths=[]
+          self.episode_waiting_times=[]
           next_state = self.reset()
         #print("Step time: ", time.time() - step_start_time)
 
@@ -769,13 +803,10 @@ class CityFlowEnv(gym.Env):
         done,
         dtype=bool
         )
-        infos = [{} for _ in range(self.num_agents)]
-        self.returns = self.returns * 0.99 + reward
-        self.ret_rms.update(self.returns)
-        reward2 = np.clip(reward / np.sqrt(self.ret_rms.var + 1e-8), -self.clip_reward, self.clip_reward)
+        
 
-        return next_state, reward2, reward, dones,queue_length , waiting_time, total_travel_time,  infos
-
+        return next_state, reward/100, dones,  infos
+        
     def _inner_step(self, action):
         # copy current measurements to previous measurements
         for inter in self.list_intersection:
