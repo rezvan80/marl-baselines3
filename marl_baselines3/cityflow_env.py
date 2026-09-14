@@ -483,6 +483,11 @@ class CityFlowEnv(gym.Env):
         self.traffic_light_node_dict = None
         self.intersection_dict = None
         self.eng = None
+        self.episode_rewards=0
+        self.episode_rewards2=0
+        self.episode_queue_lengths=[]
+        self.episode_waiting_times=[]
+        self.episode_total_travel_time=0
         self.list_intersection = None
         self.list_inter_log = None
         self.list_lanes = None
