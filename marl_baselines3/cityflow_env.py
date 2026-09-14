@@ -540,7 +540,11 @@ class CityFlowEnv(gym.Env):
                                   for j in range(self.dic_traffic_env_conf["NUM_ROW"])]
         self.list_inter_log = [[] for _ in range(self.dic_traffic_env_conf["NUM_COL"] *
                                                  self.dic_traffic_env_conf["NUM_ROW"])]
-
+        self.episode_rewards=0
+        self.episode_rewards2=0
+        self.episode_queue_lengths=[]
+        self.episode_waiting_times=[]
+        self.episode_total_travel_time=0
         self.id_to_index = {}
         count = 0
         for i in range(self.dic_traffic_env_conf["NUM_COL"]):
