@@ -20,7 +20,7 @@ from stable_baselines3.common.type_aliases import GymEnv, MaybeCallback, Rollout
 from stable_baselines3.common.utils import safe_mean, should_collect_more_steps
 from stable_baselines3.common.vec_env import VecEnv
 from stable_baselines3.her.her_replay_buffer import HerReplayBuffer
-
+from DQNPolicy import DQNPolicy, QNetwork
 SelfOffPolicyAlgorithm = TypeVar("SelfOffPolicyAlgorithm", bound="OffPolicyAlgorithm")
 
 
