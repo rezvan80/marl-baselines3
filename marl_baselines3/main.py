@@ -34,6 +34,7 @@ from cityflow_env import CityFlowEnv
 from independent_ppo import PPO
 from evaluate_policy import evaluate_policy
 from stable_baselines3.common.policies import ActorCriticPolicy
+from DQNPolicy import DQNPolicy
 
 def lane_relation(phase_map):
     num_lanes=24
