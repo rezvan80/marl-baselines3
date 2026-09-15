@@ -504,6 +504,6 @@ if __name__ == "__main__":
             args.dataset = dataset
             args.traffic_file = traffic_file
             env = main(args)
-            mean_reward, std_reward, mean_queue_length, std_queue_length, mean_queue_num, std_queue_num, mean_waiting_time, std_waiting_time, mean_travel_time, std_travel_time = evaluate_policy(ppo , env)
-            print("dataset:", dataset, "traffic_file:", traffic_file, "mean_reward:", mean_reward,"std_reward", std_reward, "mean_queue_length:" , mean_queue_length, "std_queue_length:" ,std_queue_length, "mean_queue_num:", mean_queue_num, "std_queue_num:", std_queue_num, "mean_waiting_time:" ,mean_waiting_time, "std_waiting_time:" ,std_waiting_time, "mean_travel_time:" ,mean_travel_time, "std_travel_time:" ,std_travel_time )    
+            mean_reward, std_reward, mean_queue_length, std_queue_length, mean_queue_num, std_queue_num, mean_waiting_time, std_waiting_time, mean_travel_time, std_travel_time = evaluate_policy(dqn , env)
+            print("dataset:", dataset, "traffic_file:", traffic_file, "mean_reward:", mean_reward,"std_reward:", std_reward, "mean_queue_length:", mean_queue_length, "std_queue_length:", std_queue_length, "mean_queue_num:", mean_queue_num, "std_queue_num:", std_queue_num, "mean_waiting_time:" ,mean_waiting_time, "std_waiting_time:" ,std_waiting_time, "mean_travel_time:" ,mean_travel_time, "std_travel_time:" ,std_travel_time)    
  
