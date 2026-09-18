@@ -475,6 +475,7 @@ class CityFlowEnv(gym.Env):
         self.dic_path = dic_path
         self.observation_space = Box(low=-1.0,high=1.0,shape=(24, 40,),dtype=np.float32)
         self.action_space=Discrete(4, )
+        self.action_space.seed(42)
         self.num_agents=dic_traffic_env_conf["NUM_INTERSECTIONS"]
         self.returns = np.zeros(self.num_agents)
         self.current_time = None
