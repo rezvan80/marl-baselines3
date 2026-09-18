@@ -194,11 +194,7 @@ class OnPolicyAlgorithm(BaseAlgorithm):
             self.policy.reset_noise(env.num_envs)
 
         callback.on_rollout_start()
-        episode_rewards=0
-        episode_rewards2=0
-        episode_queue_lengths=[]
-        episode_waiting_times=[]
-        episode_total_travel_time=0
+
         while n_steps < n_rollout_steps:
             if self.use_sde and self.sde_sample_freq > 0 and n_steps % self.sde_sample_freq == 0:
                 # Sample a new noise matrix
@@ -223,36 +219,8 @@ class OnPolicyAlgorithm(BaseAlgorithm):
                     # as we are sampling from an unbounded Gaussian distribution
                     clipped_actions = np.clip(actions, self.action_space.low, self.action_space.high)
 
-            new_obs, rewards,rewards2, dones,queue_length , waiting_time , total_travel_time, infos = env.step(clipped_actions)
-            episode_rewards+= rewards.sum()
-            episode_rewards2+= rewards2.sum()
-            episode_queue_lengths.append(queue_length)
-            episode_waiting_times.append(waiting_time)
-            episode_total_travel_time+=total_travel_time
- 
-            if np.any(dones): 
-              infos = [
-                  {
-                      "episode": {
-                          "r": float(episode_rewards),
-                          "r2": float(episode_rewards2),
-                          "ql": float(np.mean(episode_queue_lengths)),
-                          "qn": float(np.sum(episode_queue_lengths)),
-                          "wt": float(np.mean(episode_waiting_times)),
-                          "tt": float(episode_total_travel_time),
-                          "l": n_steps + 1,
-                      }
-                  }
-                  for i in range(self.num_agents)
-              ]
-                
-              episode_rewards=0
-              episode_rewards2=0
-              episode_queue_lengths=[]
-              episode_waiting_times=[]
-              episode_total_travel_time=0
-            else:
-              infos = [{} for _ in range(self.num_agents)]
+            new_obs, rewards, dones, infos = env.step(clipped_actions)
+
 
             self.num_timesteps += env.num_envs
 
