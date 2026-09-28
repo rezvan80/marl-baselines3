@@ -97,7 +97,7 @@ def evaluate_policy(
 
                 if dones.all():
                     
-                    current_rewards = infos[0]["episode"]["r2"]
+                    current_rewards = infos[0]["episode"]["r"]
                     current_waiting_times=infos[0]["episode"]["wt"]  
                     current_queue_lengths=infos[0]["episode"]["ql"]
                     current_queue_nums=infos[0]["episode"]["qn"]
