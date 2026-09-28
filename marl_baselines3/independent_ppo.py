@@ -87,7 +87,7 @@ class PPO(OnPolicyAlgorithm):
         n_steps: int = 2048,
         batch_size: int = 64,
         n_epochs: int = 10,
-        gamma: float = 0.99,
+        gamma: float = 0.8,
         gae_lambda: float = 0.95,
         clip_range: float | Schedule = 0.2,
         clip_range_vf: float | Schedule | None = None,
