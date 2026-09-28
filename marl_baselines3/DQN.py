@@ -89,7 +89,7 @@ class DQN(OffPolicyAlgorithm):
         learning_starts: int = 100,
         batch_size: int = 32,
         tau: float = 1.0,
-        gamma: float = 0.99,
+        gamma: float = 0.8,
         train_freq: int | tuple[int, str] = 4,
         gradient_steps: int = 1,
         replay_buffer_class: type[ReplayBuffer] | None = None,
