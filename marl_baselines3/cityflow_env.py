@@ -270,15 +270,17 @@ class Intersection:
             veh=deque([0]*30 ,maxlen=30)
             mask=deque([1]*10 , maxlen=10)
             vehicles = [veh for veh in lane_vehicles[lane] if "shadow" not in veh]
-            vehicles = sorted(vehicles,key=lambda vehicle: vehicle_distance[vehicle], reverse=True)   
-
+            vehicles = sorted(vehicles,key=lambda vehicle: vehicle_distance[vehicle], reverse=False)   
+            incoming=0
+              if i>12:
+                incoming=1
             for vehicle in vehicles:
                 # set as num_vehicle
                 if "shadow" in vehicle:  # remove the shadow
                     vehicle = vehicle[:-7]
                     continue
-
-                veh.extend([vehicle_speed[vehicle]/10 , vehicle_distance[vehicle]/300 , i/24 ])
+                
+                veh.extend([vehicle_speed[vehicle]/10 , vehicle_distance[vehicle]/300 , incoming])
                 mask.extend([0])
             v.append(list(veh)+list(mask)) 
         return v
