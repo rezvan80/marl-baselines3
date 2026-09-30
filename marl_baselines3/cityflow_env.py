@@ -272,7 +272,7 @@ class Intersection:
             vehicles = [veh for veh in lane_vehicles[lane] if "shadow" not in veh]
             vehicles = sorted(vehicles,key=lambda vehicle: vehicle_distance[vehicle], reverse=False)   
             incoming=0
-              if i>12:
+              if i>=12:
                 incoming=1
             for vehicle in vehicles:
                 # set as num_vehicle
