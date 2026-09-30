@@ -21,7 +21,6 @@ class presslight(nn.Module):
                     nn.Linear(20, action_dim)
                 )
             )
-        self.phase_map= [[1, 4, 12, 13, 14, 15, 16, 17], [7, 10, 18, 19, 20, 21, 22, 23], [0, 3, 18, 19, 20, 21, 22, 23], [6, 9, 12, 13, 14, 15, 16, 17]]
         self.register_buffer("phase",th.tensor([[0, 1, 0, 1, 0, 0, 0, 0],[0, 0, 0, 0, 0, 1, 0, 1],[1, 0, 1, 0, 0, 0, 0, 0],[0, 0, 0, 0, 1, 0, 1, 0]], dtype=th.float32))
     def forward(self, x: th.Tensor) -> th.Tensor:
         shared=self.shared_hidden(x)
@@ -37,8 +36,6 @@ class presslight(nn.Module):
             list_selected_q_values.append(q_values* selector.to(x.dtype))
         q_values=sum(list_selected_q_values)
 
-        
-        #context_vector2=self.policy_net2(context_vector2)
         return q_values
 
 
