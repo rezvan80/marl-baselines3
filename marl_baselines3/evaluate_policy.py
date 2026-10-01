@@ -105,7 +105,7 @@ def evaluate_policy(
                     current_lengths =infos[0]["episode"]["l"]
                     episode_rewards.append(current_rewards)
                     episode_queue_lengths.append(current_queue_lengths)
-                    episode_queue_nums.append(current_queue_lengths)
+                    episode_queue_nums.append(current_queue_nums)
                     episode_waiting_times.append(current_waiting_times)
                     episode_travel_times.append(current_travel_times)
                     episode_lengths.append(current_lengths)
