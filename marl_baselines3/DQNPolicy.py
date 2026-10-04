@@ -228,8 +228,8 @@ class SelfAttention(nn.Module):
             batch_first=True
         )
 
-        self.linear1 = nn.Linear(2, 32)
-        self.linear2 = nn.Linear(2, 32)
+        self.linear1 = nn.Linear(3, 32)
+        self.linear2 = nn.Linear(3, 32)
         self.linear3 = nn.Linear(32, 20)
         self.linear4 = nn.Linear(32, 20)
         self.linear5 = nn.Linear(20, 20)
@@ -270,7 +270,7 @@ class SelfAttention(nn.Module):
         x=x.reshape(-1, 24, 40)
         x[: , : ,39]=0
         mask=x[: , : , 30:].reshape(-1 , 240 ).bool()
-        x=x[: , : , :20].reshape(-1 , 240 , 2) 
+        x=x[: , : , :30].reshape(-1 , 240 , 3) 
         x=self.linear1(x)
     
         x , _=self.transformerblock1(x , mask)
@@ -304,7 +304,7 @@ class SelfAttention(nn.Module):
         x=x.reshape(-1, 24, 40)
         x[: , : ,39]=0
         mask=x[: , : , 30:].reshape(-1 , 240 ).bool()
-        x=x[: , : , :20].reshape(-1 , 240 , 2)
+        x=x[: , : , :30].reshape(-1 , 240 , 3)
         x=self.linear2(x)
         x , _=self.transformerblock3(x , mask)
         x , _=self.transformerblock4(x , mask)
