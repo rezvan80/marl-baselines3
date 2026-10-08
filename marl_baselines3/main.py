@@ -35,7 +35,7 @@ from independent_ppo import PPO
 from evaluate_policy import evaluate_policy
 from stable_baselines3.common.policies import ActorCriticPolicy
 from DQNPolicy import DQNPolicy
-
+from DQN import DQN
 def lane_relation(phase_map):
     num_lanes=24
     lane_relation = np.zeros((num_lanes, num_lanes))
@@ -497,13 +497,13 @@ if __name__ == "__main__":
     datasets={"jinan":["anon_3_4_jinan_real.json" , "anon_3_4_jinan_real_2000.json" , "anon_3_4_jinan_real_2500.json" , "anon_3_4_jinan_synthetic_24000_60min.json"], "hangzhou":["anon_4_4_hangzhou_real.json", "anon_4_4_hangzhou_real_5816.json", "anon_4_4_hangzhou_synthetic_24000_60min.json"], "newyork_28x7":["anon_28_7_newyork_real_double.json" , "anon_28_7_newyork_real_triple.json"]}
     env = main(args)
     ppo=PPO(CustomPolicy  ,  env , verbose=1 ,batch_size=30, n_steps=120)
-    ppo.learn(env, total_timesteps=24000 , log_interval=1)
+    ppo.learn(env, total_timesteps=12000 , log_interval=1)
         
     for dataset, traffic_files in datasets.items():
         for traffic_file in traffic_files:
             args.dataset = dataset
             args.traffic_file = traffic_file
             env = main(args)
-            mean_reward, std_reward, mean_queue_length, std_queue_length, mean_queue_num, std_queue_num, mean_waiting_time, std_waiting_time, mean_travel_time, std_travel_time = evaluate_policy(dqn , env)
+            mean_reward, std_reward, mean_queue_length, std_queue_length, mean_queue_num, std_queue_num, mean_waiting_time, std_waiting_time, mean_travel_time, std_travel_time = evaluate_policy(ppo , env)
             print("dataset:", dataset, "traffic_file:", traffic_file, "mean_reward:", mean_reward,"std_reward:", std_reward, "mean_queue_length:", mean_queue_length, "std_queue_length:", std_queue_length, "mean_queue_num:", mean_queue_num, "std_queue_num:", std_queue_num, "mean_waiting_time:" ,mean_waiting_time, "std_waiting_time:" ,std_waiting_time, "mean_travel_time:" ,mean_travel_time, "std_travel_time:" ,std_travel_time)    
  
