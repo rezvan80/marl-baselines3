@@ -253,9 +253,12 @@ class Intersection:
 
         dic_feature["num_in_seg_attend"] = self._orgnize_several_segments_attend(dic_feature["lane_num_waiting_vehicle_in"],
                                                                                  dic_feature["lane_num_waiting_vehicle_out"])
+        dic_feature["num_in_veh_attend"] = self._orgnize_several_vehicle_attend(dic_feature["lane_num_waiting_vehicle_in"],
+                                                                                 dic_feature["lane_num_waiting_vehicle_out"])
+    
         self.dic_feature = dic_feature
 
-    def _orgnize_several_segments_attend(self, queue_in, queue_out):
+    def _orgnize_several_vehicle_attend(self, queue_in, queue_out):
         v = self._get_several_segments_attend(lane_vehicles=self.dic_lane_vehicle_current_step,
                                                                 vehicle_distance=self.dic_vehicle_distance_current_step,
                                                                 vehicle_speed=self.dic_vehicle_speed_current_step,
@@ -263,7 +266,7 @@ class Intersection:
                                                                 list_lanes=self.list_lanes)
         return v
 
-    def _get_several_segments_attend(self, lane_vehicles, vehicle_distance, vehicle_speed,
+    def _get_several_vehicle_attend(self, lane_vehicles, vehicle_distance, vehicle_speed,
                                            lane_length, list_lanes):
         v=[]
         for i, lane in enumerate(list_lanes):
@@ -272,7 +275,7 @@ class Intersection:
             vehicles = [veh for veh in lane_vehicles[lane] if "shadow" not in veh]
             vehicles = sorted(vehicles,key=lambda vehicle: vehicle_distance[vehicle], reverse=False)   
             incoming=0
-              if i>=12:
+            if i>=12:
                 incoming=1
             for vehicle in vehicles:
                 # set as num_vehicle
@@ -284,6 +287,46 @@ class Intersection:
                 mask.extend([0])
             v.append(list(veh)+list(mask)) 
         return v
+    def _orgnize_several_segments_attend(self, queue_in, queue_out):
+        part1, part2, part3 = self._get_several_segments_attend(lane_vehicles=self.dic_lane_vehicle_current_step,
+                                                                vehicle_distance=self.dic_vehicle_distance_current_step,
+                                                                vehicle_speed=self.dic_vehicle_speed_current_step,
+                                                                lane_length=self.lane_length,
+                                                                list_lanes=self.list_lanes)
+        run_in_part1 = [float(len(part1[lane])) for lane in self.list_entering_lanes]
+        run_in_part2 = [float(len(part2[lane])) for lane in self.list_entering_lanes]
+        run_in_part3 = [float(len(part3[lane])) for lane in self.list_entering_lanes]
+
+        run_out_part1 = [float(len(part1[lane])) for lane in self.list_exiting_lanes]
+        run_out_part2 = [float(len(part2[lane]))for lane in self.list_exiting_lanes]
+        run_out_part3 = [float(len(part3[lane])) for lane in self.list_exiting_lanes]
+
+        total_in, total_out = [], []
+        for i in range(12):
+            total_in.extend([run_in_part1[i], run_in_part2[i], run_in_part3[i], queue_in[i]])
+            total_out.extend([run_out_part1[i], run_out_part2[i], run_out_part3[i], queue_out[i]])
+        return total_in + total_out
+
+    def _get_several_segments_attend(self, lane_vehicles, vehicle_distance, vehicle_speed,
+                                           lane_length, list_lanes):
+        obs_length = 100
+        part1, part2, part3 = {}, {}, {}
+        for lane in list_lanes:
+            part1[lane], part2[lane], part3[lane] = [], [], []
+            for vehicle in lane_vehicles[lane]:
+                # set as num_vehicle
+                if "shadow" in vehicle:  # remove the shadow
+                    vehicle = vehicle[:-7]
+                    continue
+                if vehicle_speed[vehicle] > 0.1:
+                    temp_v_distance = vehicle_distance[vehicle]
+                    if temp_v_distance > lane_length[lane] - obs_length:
+                        part1[lane].append(vehicle)
+                    elif lane_length[lane] - 2 * obs_length < temp_v_distance <= lane_length[lane] - obs_length:
+                        part2[lane].append(vehicle)
+                    elif lane_length[lane] - 3 * obs_length < temp_v_distance <= lane_length[lane] - 2 * obs_length:
+                        part3[lane].append(vehicle)
+        return part1, part2, part3
 
 
     @staticmethod
